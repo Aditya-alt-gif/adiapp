@@ -93,12 +93,18 @@ button:hover{transform:scale(1.1);}
 
 <canvas id="fireworks"></canvas>
 
-<!-- Sounds -->
-<audio id="clickSound" src="https://www.soundjay.com/buttons/sounds/button-09.mp3"></audio>
-<audio id="yesSound" src="https://www.soundjay.com/human/sounds/applause-01.mp3"></audio>
+<!-- Sound Effects -->
+<audio id="clickSound" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
+<audio id="sadMusic" loop src="https://assets.mixkit.co/active_storage/sfx/1243/1243-preview.mp3"></audio>
+<audio id="crySound" src="https://assets.mixkit.co/active_storage/sfx/2003/2003-preview.mp3"></audio>
+<audio id="noSound" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3"></audio>
+<audio id="yesSound" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"></audio>
+
+<!-- Background Romantic Music -->
 <audio id="bgMusic" loop>
   <source src="https://www.bensound.com/bensound-music/bensound-love.mp3">
 </audio>
+
 
 <div class="card" id="main">
   <div class="name">Nishika 💖</div>
@@ -121,44 +127,110 @@ button:hover{transform:scale(1.1);}
 </div>
 
 <script>
-let musicStarted=false;
+let musicStarted = false;
+let noCount = 0;
 
+/* 🎶 Romantic BG (YES ke liye) */
 function startMusic(){
   if(!musicStarted){
+    bgMusic.volume = 0.3;
     bgMusic.play();
-    musicStarted=true;
+    musicStarted = true;
   }
 }
 
+/* ❌ NO logic (EMOTIONAL DAMAGE 😭) */
 function no(){
-  startMusic(); clickSound.play();
-  main.style.display="none";
-  yesPage.style.display="none";
-  noPage.style.display="block";
+  noCount++;
+
+  main.style.display = "none";
+  yesPage.style.display = "none";
+  noPage.style.display = "block";
+
+  const title = noPage.querySelector("h1");
+  const noBtn = noPage.querySelector(".no");
+
+  if(noCount === 1){
+    // 😔 First NO — sad music
+    sadMusic.volume = 0.4;
+    sadMusic.play();
+    title.innerHTML = "Fir se soch lo Nishika 😔";
+
+  } 
+  else if(noCount === 2){
+    // 😭 Second NO — crying effect
+    sadMusic.pause();
+    crySound.play();
+
+    title.innerHTML = "Ab NO click karke dikhao 😏";
+
+    if(noBtn) noBtn.style.display = "none"; // ❌ NO GAYAB
+
+    startCrying(); // 😭 emoji rain
+  }
 }
 
+/* 🔙 BACK */
 function back(){
+  clickSound.currentTime = 0;
   clickSound.play();
-  noPage.style.display="none";
-  main.style.display="block";
+
+  noPage.style.display = "none";
+  main.style.display = "block";
 }
 
+/* ❤️ YES */
 function yes(){
-  startMusic(); yesSound.play();
-  main.style.display="none";
-  noPage.style.display="none";
-  yesPage.style.display="block";
-  startFireworks();   // 🎆 FIREWORKS HERE
+  sadMusic.pause();
+  crySound.pause();
+
+  startMusic();
+  yesSound.currentTime = 0;
+  yesSound.play();
+
+  main.style.display = "none";
+  noPage.style.display = "none";
+  yesPage.style.display = "block";
+
+  startFireworks(); // 🎆
 }
 
+/* 😭 Crying Emoji Effect */
+function startCrying(){
+  const interval = setInterval(()=>{
+    const c = document.createElement("div");
+    c.innerHTML = "😭";
+    c.style.position = "fixed";
+    c.style.left = Math.random()*100 + "vw";
+    c.style.top = "-30px";
+    c.style.fontSize = "26px";
+    c.style.animation = "cryFall 3s linear";
+    document.body.appendChild(c);
+
+    setTimeout(()=>c.remove(),3000);
+  },200);
+
+  setTimeout(()=>clearInterval(interval),4000);
+}
+
+/* Animation */
+const style = document.createElement("style");
+style.innerHTML = `
+@keyframes cryFall{
+  to{ transform: translateY(110vh); opacity:0; }
+}`;
+document.head.appendChild(style);
+
+/* 📤 SHARE */
 function share(){
-  const text="Nishika 💖 Will you be my Valentine? 😍";
+  clickSound.play();
+  const text = "Nishika 💖 Will you be my Valentine? 😍";
   navigator.share
-    ? navigator.share({title:"Valentine 💘",text,url:location.href})
+    ? navigator.share({ title:"Valentine 💘", text, url: location.href })
     : alert(location.href);
 }
 
-/* Hearts */
+/* ❤️ Hearts (same) */
 setInterval(()=>{
   const h=document.createElement("div");
   h.className="heart";
@@ -170,7 +242,7 @@ setInterval(()=>{
   setTimeout(()=>h.remove(),7000);
 },300);
 
-/* Fireworks 🎆 */
+/* 🎆 Fireworks (same) */
 const canvas=document.getElementById("fireworks");
 const ctx=canvas.getContext("2d");
 canvas.width=innerWidth;
@@ -194,11 +266,13 @@ function boom(){
   setTimeout(()=>ctx.clearRect(0,0,canvas.width,canvas.height),600);
 }
 
-/* Service Worker */
+/* ⚙️ PWA */
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js");
 }
 </script>
+
+
 
 </body>
 </html>
